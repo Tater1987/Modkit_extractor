@@ -100,40 +100,6 @@ class CarcolsMetaExtractor:
         import re
         return [int(x) if x.isdigit() else x.lower() for x in re.split(r'(\d+)', text)]
     
-    def save_to_txt(self, output_file="carcols_ids.txt"):
-        """Save extracted data to text file"""
-        if not self.results:
-            print("No data to save!")
-            return
-        
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("Carcols.meta ID Values Extraction Report\n")
-            f.write("=" * 50 + "\n\n")
-            
-            # Group by folder for cleaner output
-            folders = {}
-            for result in self.results:
-                folder = result['folder']
-                if folder not in folders:
-                    folders[folder] = []
-                folders[folder].append(result['id_value'])
-            
-            # Write grouped results (only sort IDs within each folder)
-            for folder, ids in folders.items():
-                sorted_ids = sorted(ids, key=self.natural_sort_key)
-                f.write(f"Folder: {folder}\n")
-                f.write("-" * 30 + "\n")
-                for id_value in sorted_ids:
-                    f.write(f"ID: {id_value}\n")
-                f.write("\n")
-            
-            # Write summary
-            f.write("=" * 50 + "\n")
-            f.write(f"Total folders processed: {len(folders)}\n")
-            f.write(f"Total ID values found: {len(self.results)}\n")
-        
-        print(f"\nResults saved to {output_file}")
-    
     def check_for_duplicates(self):
         """Check for duplicate ID values and return duplicate info"""
         id_map = {}
@@ -168,35 +134,39 @@ class CarcolsMetaExtractor:
         
         print(f"Simple format saved to {output_file}")
     
-    def save_duplicates_report(self, output_file="duplicate_ids.txt"):
-        """Save duplicate ID values report (IDs sorted numerically)"""
-        duplicates = self.check_for_duplicates()
+    def save_to_txt(self, output_file="carcols_ids.txt"):
+    """Save extracted data to text file"""
+    if not self.results:
+        print("No data to save!")
+        return
+    
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write("Carcols.meta ID Values Extraction Report\n")
+        f.write("=" * 50 + "\n\n")
         
-        if not duplicates:
-            print("No duplicate ID values found!")
-            return
+        # Group by folder for cleaner output
+        folders = {}
+        for result in self.results:
+            folder = result['folder']
+            if folder not in folders:
+                folders[folder] = []
+            folders[folder].append(result['id_value'])
         
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("DUPLICATE ID VALUES REPORT\n")
-            f.write("=" * 50 + "\n\n")
-            
-            # Sort duplicate IDs numerically
-            for id_value in sorted(duplicates.keys(), key=self.natural_sort_key):
-                locations = duplicates[id_value]
-                f.write(f"ID: {id_value} (found {len(locations)} times)\n")
-                f.write("-" * 30 + "\n")
-                for location in locations:
-                    f.write(f"  Folder: {location['folder']}\n")
-                    f.write(f"  Path: {location['file_path']}\n")
-                f.write("\n")
-            
-            f.write("=" * 50 + "\n")
-            f.write(f"Total duplicate IDs: {len(duplicates)}\n")
-            total_duplicates = sum(len(locations) for locations in duplicates.values())
-            f.write(f"Total duplicate instances: {total_duplicates}\n")
+        # Write grouped results (only sort IDs within each folder)
+        for folder, ids in folders.items():
+            sorted_ids = sorted(ids, key=self.natural_sort_key)
+            f.write(f"Folder: {folder}\n")
+            f.write("-" * 30 + "\n")
+            for id_value in sorted_ids:
+                f.write(f"ID: {id_value}\n")
+            f.write("\n")
         
-        print(f"Duplicate report saved to {output_file}")
-        print(f"Found {len(duplicates)} duplicate IDs with {sum(len(locations) for locations in duplicates.values())} total instances")
+        # Write summary
+        f.write("=" * 50 + "\n")
+        f.write(f"Total folders processed: {len(folders)}\n")
+        f.write(f"Total ID values found: {len(self.results)}\n")
+    
+    print(f"\nResults saved to {output_file}")
 
 def main():
     # Initialize the extractor with multiple directories
